@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:meal_app/data/dummy_data.dart';
-import 'package:meal_app/models/meal.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:meal_app/providers/favorite_meal_provider_notifier.dart';
+import 'package:meal_app/providers/filter_provider.dart';
+import 'package:meal_app/providers/meals_provider.dart';
 import 'package:meal_app/screens/categoriesScrenn.dart';
 import 'package:meal_app/screens/filterScreen.dart';
 import 'package:meal_app/screens/mealScrenn.dart';
@@ -13,34 +16,19 @@ const kInitialFilters = {
   Filter.vegan: false
 };
 
-class Tapbar extends StatefulWidget {
+class Tapbar extends ConsumerStatefulWidget {
   const Tapbar({super.key});
 
   @override
   // ignore: no_logic_in_create_state
-  State<Tapbar> createState() {
+  ConsumerState<Tapbar> createState() {
     return _TapbarState();
   }
 }
 
-class _TapbarState extends State<Tapbar> {
+class _TapbarState extends ConsumerState<Tapbar> {
   // ignore: non_constant_identifier_names
   int _SelectedPageIndex = 0;
-  final List<Meal> _favoritemeal = [];
-  Map<Filter, bool> _selectedFliters = kInitialFilters;
-  void toggleMealFavoriteStatues(Meal meal) {
-    final isexistind = _favoritemeal.contains(meal);
-    if (isexistind) {
-      setState(() {
-        _favoritemeal.remove(meal);
-      });
-    } else {
-      setState(() {
-        _favoritemeal.add(meal);
-      });
-    }
-    print(_favoritemeal);
-  }
 
   void _selectedpage(int index) {
     setState(() {
@@ -51,16 +39,11 @@ class _TapbarState extends State<Tapbar> {
   void _setselectscreen(String idantifer) async {
     if (idantifer == "Filters") {
       Navigator.of(context).pop();
-      final result = await Navigator.of(context).push<Map<Filter, bool>>(
+      await Navigator.of(context).push<Map<Filter, bool>>(
         MaterialPageRoute(
-          builder: (ctx) => Filterscreen(
-            currentFilters: _selectedFliters,
-          ),
+          builder: (ctx) => Filterscreen(),
         ),
       );
-      setState(() {
-        _selectedFliters = result ?? kInitialFilters;
-      });
     } else {
       Navigator.pop(context);
     }
@@ -68,30 +51,16 @@ class _TapbarState extends State<Tapbar> {
 
   @override
   Widget build(BuildContext context) {
-    final availableMeals = dummyMeals.where((meal) {
-      if (_selectedFliters[Filter.glutenFree]! && !meal.isGlutenFree) {
-        return false;
-      }
-      if (_selectedFliters[Filter.lactoseFree]! && !meal.isLactoseFree) {
-        return false;
-      }
-      if (_selectedFliters[Filter.vegetarian]! && !meal.isVegetarian) {
-        return false;
-      }
-      if (_selectedFliters[Filter.vegan]! && !meal.isVegan) {
-        return false;
-      }
-      return true;
-    }).toList();
+    final availableMeals = ref.watch(filteredMealsProvider);
+
     Widget activeScrenn = Categoriesscrenn(
-      ontoggleMealFavortie: toggleMealFavoriteStatues,
       availibleMeals: availableMeals,
     );
     var activeScrennTitle = 'categorie';
     if (_SelectedPageIndex == 1) {
+      final favoritemeal = ref.watch(FavoriteMealProvider);
       activeScrenn = Mealscrenn(
-        meals: _favoritemeal,
-        ontoggleMealFavortie: toggleMealFavoriteStatues,
+        meals: favoritemeal,
       );
       activeScrennTitle = 'your favorite';
     }
@@ -109,9 +78,19 @@ class _TapbarState extends State<Tapbar> {
         onTap: _selectedpage,
         items: const [
           BottomNavigationBarItem(
-              icon: Icon(Icons.set_meal), label: 'categories'),
+              icon: Icon(Icons.set_meal),
+              label: 'categories',
+              activeIcon: Icon(
+                Icons.set_meal,
+                color: Colors.blue,
+              )),
           BottomNavigationBarItem(
-              icon: Icon(Icons.star), label: 'Your favorites'),
+              icon: Icon(Icons.star),
+              label: 'Your favorites',
+              activeIcon: Icon(
+                Icons.star,
+                color: Colors.blue,
+              )),
         ],
       ),
     );
