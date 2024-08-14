@@ -6,8 +6,8 @@ import 'package:meal_app/screens/tapbar.dart';
 
 final theme = ThemeData(
   colorScheme: ColorScheme.fromSeed(
-    brightness: Brightness.dark,
-    seedColor: Color.fromARGB(255, 3, 192, 113),
+    brightness: Brightness.light,
+    seedColor: const Color.fromARGB(255, 247, 149, 2),
   ),
   textTheme: GoogleFonts.latoTextTheme(),
 );

@@ -39,6 +39,12 @@ dependencies:
   transparent_image: ^2.0.1
   riverpod: ^2.5.1
   flutter_riverpod: ^2.5.1
+  flutter_launcher_icons: ^0.13.1
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/images/logo.png"
+  icon_size: 512 
+      
 
 dev_dependencies:
   flutter_test:
